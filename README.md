@@ -42,7 +42,7 @@ Generate coverage:
 npm run test:coverage
 ```
 
-Check coverage (edit limits in [`.istanbul.yml`](.istanbul.yml):
+Check coverage (edit limits in [`.istanbul.yml`](.istanbul.yml#L37-L49):
 ```
 npm run test:check-coverage
 ```
