@@ -66,11 +66,6 @@ npm run dist
 
 **NOTE:** source maps are included in dist, see [`webpack.config.js`](webpack.config.js#L147) to remove them
 
-Open dist in browser:
-```
-npm run dist:serve
-```
-
 Build Docker image:
 ```
 npm run docker:build
