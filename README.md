@@ -14,7 +14,7 @@ Features:
  - [Mocha](https://mochajs.org/) and [Chai](http://chaijs.com/) for testing
  - [Istanbul](https://github.com/gotwarlost/istanbul) code coverage
  - [ESLint](http://eslint.org/) and [Stylelint](https://github.com/stylelint/stylelint) for linting
- - [Docker](https://www.docker.com/) image based on [gliderlabs/alpine:3.4](https://hub.docker.com/r/gliderlabs/alpine/), [nginx](https://nginx.org/) as a server
+ - [Docker](https://www.docker.com/) image based on [alpine:3.7](https://hub.docker.com/_/alpine/), [nginx](https://nginx.org/) as a server
  
 ## Setup
 
@@ -78,9 +78,9 @@ npm run docker:build
 
 Run Docker container in port 80 (remove running container with `npm run docker:remove`):
 ```
-npm run docker:run
+npm run docker
 ```
 
 ## License
 
-[MIT License](LICENSE)
+[MIT](LICENSE)

@@ -3,7 +3,7 @@ FROM alpine:3.7
 RUN apk --no-cache add \
     ruby \
     nginx \
-    rm -rf /var/cache/apk/*
+    && rm -rf /var/cache/apk/*
 
 COPY nginx/nginx.conf.erb /etc/nginx/
 COPY nginx/start.sh /
