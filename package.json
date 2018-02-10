@@ -22,7 +22,10 @@
     "test": "jest --coverage",
     "pretest": "rimraf coverage",
     "test:update": "npm run test -- --updateSnapshot",
+    "format:ts": "prettier --write \"**/*.ts\"",
     "format:scss": "prettier --write \"**/*.scss\"",
+    "format:md": "prettier --write \"**/*.md\"",
+    "toc": "markdown-toc -i",
     "lint:ts": "",
     "lint:scss": "stylelint 'app/**/*.scss' --syntax scss",
     "dist": "NODE_ENV=production webpack -p --bail --display-error-details",
@@ -33,9 +36,10 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "prettier": "^1.10.2",
+    "markdown-toc": "1.2.0",
+    "prettier": "1.10.2",
     "rimraf": "2.6.2",
-    "stylelint": "^8.4.0",
-    "stylelint-config-standard": "^18.0.0"
+    "stylelint": "8.4.0",
+    "stylelint-config-standard": "18.0.0"
   }
 }
