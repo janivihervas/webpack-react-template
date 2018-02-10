@@ -1,22 +1,48 @@
-# Template project for Webpack and React
+# Template project for React
 
-Tired of those "simple" Webpack configuration files? Me too, that's why 
-I created this template project. The main focus of this project is in 
-Webpack configuration and testing setup, so you can also use frameworks other 
-than React or add frameworks like Redux.
+<!-- toc -->
 
-Features:
- - Simple, production-ready, fully-featured and reasonaboutable [Webpack](http://webpack.github.io/) configuration
- - [React](https://facebook.github.io/react/)
- - [react-hot-loader](https://github.com/gaearon/react-hot-loader)
- - ES6
- - [SCSS](http://sass-lang.com/)
- - [Mocha](https://mochajs.org/) and [Chai](http://chaijs.com/) for testing
- - [Istanbul](https://github.com/gotwarlost/istanbul) code coverage
- - [ESLint](http://eslint.org/) and [Stylelint](https://github.com/stylelint/stylelint) for linting
- - [Docker](https://www.docker.com/) image based on [alpine:3.7](https://hub.docker.com/_/alpine/), [nginx](https://nginx.org/) as a server
- 
+* [Setup](#setup)
+  * [Prerequisites](#prerequisites)
+  * [Install](#install)
+  * [Development](#development)
+  * [Test](#test)
+  * [Format](#format)
+  * [Lint](#lint)
+  * [Build](#build)
+* [License](#license)
+
+<!-- tocstop -->
+
+Simple and reasonaboutable, fully-featured, production-ready React project template.
+
+Tools and frameworks used:
+
+* [Webpack v3](http://webpack.github.io/) for bundling
+* [React](https://facebook.github.io/react/) for rendering DOM
+* [Redux](https://github.com/reactjs/redux/) for state management
+* [Jest](https://facebook.github.io/jest/) for testing
+* [Typescript](https://www.typescriptlang.org/) for static types
+* [SCSS](http://sass-lang.com/) for styles
+* [Bootstrap v4](https://getbootstrap.com/) for basic styles
+* [Docker](https://www.docker.com/) image based on [alpine:3.7](https://hub.docker.com/_/alpine/), [nginx](https://nginx.org/) as a server
+* [Prettier](https://github.com/prettier/prettier) for formatting
+* [TSLint](https://palantir.github.io/tslint/) and [Stylelint](https://github.com/stylelint/stylelint) for linting
+
 ## Setup
+
+### Prerequisites
+
+You need to install
+
+* [`parallel`](https://www.gnu.org/software/parallel/)
+* [`nvm`](https://github.com/creationix/nvm#installation)
+
+and run
+
+```
+nvm install
+```
 
 ### Install
 
@@ -30,36 +56,46 @@ npm install
 npm run serve
 ```
 
-### Code quality
+### Test
 
-Run tests:
 ```
 npm test
 ```
 
-Generate coverage:
+Update snapshots:
+
 ```
-npm run test:coverage
+npm run test:update
 ```
 
-Check coverage (edit limits in [`.istanbul.yml`](.istanbul.yml#L37-L49):
+### Format
+
 ```
-npm run test:check-coverage
+npm run format
 ```
 
-Linting:
+Generate table of contents for Markdown files:
+
 ```
-npm run lint:js
+npm run toc
 ```
-for JavaScript files and
+
+### Lint
+
 ```
-npm run lint:scss
+npm run lint
 ```
-for SCSS files.
+
+Fix linting errors:
+
+```
+npm run lint:fix
+```
 
 ### Build
 
 Build dist:
+
 ```
 npm run dist
 ```
@@ -67,11 +103,13 @@ npm run dist
 **NOTE:** source maps are included in dist, see [`webpack.config.js`](webpack.config.js#L147) to remove them
 
 Build Docker image:
+
 ```
 npm run docker:build
 ```
 
 Run Docker container in port 80 (remove running container with `npm run docker:remove`):
+
 ```
 npm run docker
 ```
