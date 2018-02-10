@@ -22,6 +22,7 @@
     "test": "jest --coverage",
     "pretest": "rimraf coverage",
     "test:update": "npm run test -- --updateSnapshot",
+    "format:scss": "prettier --write \"**/*.scss\"",
     "lint:ts": "",
     "lint:scss": "stylelint 'app/**/*.scss' --syntax scss",
     "dist": "NODE_ENV=production webpack -p --bail --display-error-details",
@@ -33,6 +34,9 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "rimraf": "2.6.2"
+    "prettier": "^1.10.2",
+    "rimraf": "2.6.2",
+    "stylelint": "^8.4.0",
+    "stylelint-config-standard": "^18.0.0"
   }
 }
