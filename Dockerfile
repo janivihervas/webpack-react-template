@@ -1,8 +1,9 @@
-FROM gliderlabs/alpine:3.4
+FROM alpine:3.7
 
 RUN apk --no-cache add \
     ruby \
-    nginx
+    nginx \
+    && rm -rf /var/cache/apk/*
 
 COPY nginx/nginx.conf.erb /etc/nginx/
 COPY nginx/start.sh /
