@@ -1,6 +1,13 @@
 {
   "presets": [
-    "es2015",
-    "react"
+    ["env", {
+      "useBuiltIns": true,
+      "targets": {
+        "browsers": ["last 3 versions", "not ie < 10"]
+      }
+    }]
+  ],
+  "plugins": [
+    "transform-object-rest-spread"
   ]
 }

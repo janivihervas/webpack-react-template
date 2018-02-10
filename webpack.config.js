@@ -1,173 +1,265 @@
-/* eslint no-var: 0 */
+const path = require("path")
+const webpack = require("webpack")
+const autoprefixer = require("autoprefixer")
+const HtmlWebpackPlugin = require("html-webpack-plugin")
+const ExtractTextPlugin = require("extract-text-webpack-plugin")
+const UglifyJSPlugin = require("uglifyjs-webpack-plugin")
+const CleanWebpackPlugin = require("clean-webpack-plugin")
 
-var path = require('path');
-var webpack = require('webpack');
-var autoprefixer = require('autoprefixer');
-var StyleLintPlugin = require('stylelint-webpack-plugin');
-var WebpackMd5Hash = require('webpack-md5-hash');
-var HtmlWebpackPlugin = require('html-webpack-plugin');
-var ExtractTextPlugin = require('extract-text-webpack-plugin');
-var extractSCSS = new ExtractTextPlugin('styles.[contenthash].css');
+process.env.NODE_ENV = process.env.NODE_ENV || "dev"
+const ENV = {
+  NODE_ENV: JSON.stringify(process.env.NODE_ENV),
+}
 
-var PACKAGE_JSON = require('./package.json');
-var SRC_PATH = path.join(__dirname, 'app');
-var TEST_PATH = path.join(__dirname, 'test');
-var IMAGES_PATH = path.join(SRC_PATH, 'images');
-var DIST_PATH = path.join(__dirname, 'dist');
+const PRODUCTION = process.env.NODE_ENV === "production"
+const SRC_PATH = path.join(__dirname, "app")
+const DIST_PATH = path.join(__dirname, "dist")
 
-var PRODUCTION = process.env.NODE_ENV === 'production';
+const extractAppStyles = new ExtractTextPlugin({
+  filename: "[name].[contenthash].css",
+})
+const extractVendorStyles = new ExtractTextPlugin({
+  filename: "vendor.[contenthash].css",
+})
 
 function getEntry() {
-  var entries = [
-    'babel-polyfill',
-    path.join(SRC_PATH, 'index.js')
-  ];
-
-  if (PRODUCTION) {
-    return {
-      app: entries,
-      vendor: Object.keys(PACKAGE_JSON.dependencies).filter(
-        function (d) {
-          return d !== 'normalize.css';
-        }
-      )
-    };
+  return {
+    app: path.join(SRC_PATH, "index.ts"),
   }
-
-  return entries
-    .concat([
-      'webpack-dev-server/client?http://localhost:8080',
-      'webpack/hot/only-dev-server'
-    ]);
 }
 
 function getOutput() {
   if (PRODUCTION) {
     return {
-      path: DIST_PATH,
-      filename: '[name].[chunkhash].js',
-      chunkFilename: '[name].[chunkhash].js'
-    };
+      path: path.join(DIST_PATH, "assets"),
+      filename: "[name].[chunkhash].js",
+      chunkFilename: "[name].[chunkhash].js",
+      publicPath: "/",
+    }
   }
 
   return {
-    filename: 'bundle.js'
-  };
+    filename: "bundle.js",
+  }
 }
 
-function getLoaders() {
-  var loaders = [
+function getRules() {
+  const noSourceMap = {sourceMap: false}
+  const styleLoader = {loader: "style-loader", options: noSourceMap}
+  const cssLoader = {
+    loader: "css-loader",
+    options: {...noSourceMap, minimize: PRODUCTION, importLoaders: true},
+  }
+  const postCssLoader = {
+    loader: "postcss-loader",
+    options: {
+      ...noSourceMap,
+      plugins: [
+        autoprefixer({
+          grid: true,
+        }),
+      ],
+    },
+  }
+  const sassLoader = {loader: "sass-loader", options: noSourceMap}
+  const fileLoaderOpts = {
+    name: "[name].[hash].[ext]",
+  }
+  const urlLoaderOpts = {...fileLoaderOpts, limit: 10000}
+  const babelLoader = {loader: "babel-loader", options: {cacheDirectory: true}}
+
+  const rules = [
     {
-      test: /\.(png|jpg|jpeg|gif)$/i,
-      include: IMAGES_PATH,
-      loader: 'url-loader?limit=100000'
-    }
-  ];
+      test: /\.(png|jpg|jpeg|gif|svg)$/i,
+      include: [SRC_PATH],
+      use: [
+        {
+          loader: "url-loader",
+          options: {
+            limit: 100000,
+          },
+        },
+      ],
+    },
+    {
+      test: /\.jsx?$/,
+      include: SRC_PATH,
+      use: [babelLoader],
+    },
+    {
+      test: /\.tsx?$/,
+      include: SRC_PATH,
+      use: [babelLoader, {loader: "ts-loader"}],
+    },
+  ]
 
   if (PRODUCTION) {
-    return loaders
-      .concat([
-        {
-          test: /\.jsx?$/,
-          loaders: ['babel-loader'],
-          include: SRC_PATH
-        },
-        {
-          test: /\.scss$/,
-          include: SRC_PATH,
-          loader: extractSCSS.extract('style-loader',
-            '!css-loader!postcss-loader!sass-loader')
-        }
-      ]);
-  }
-
-  return loaders
-    .concat([
-      {
-        test: /\.jsx?$/,
-        loaders: ['react-hot', 'babel-loader?cacheDirectory'],
-        include: SRC_PATH
-      },
+    return rules.concat([
       {
         test: /\.scss$/,
         include: SRC_PATH,
-        loader: 'style-loader' +
-        '!css-loader!postcss-loader!sass-loader'
-      }
-    ]);
+        loader: extractAppStyles.extract({
+          fallback: "style-loader",
+          use: [cssLoader, postCssLoader, sassLoader],
+        }),
+      },
+      {
+        test: /\.css$/,
+        include: path.join(__dirname, "node_modules"),
+        loader: extractVendorStyles.extract({
+          fallback: "style-loader",
+          use: [cssLoader, postCssLoader],
+        }),
+      },
+      {
+        test: /\.woff(\?v=\d+\.\d+\.\d+)?$/,
+        use: [
+          {
+            loader: "url-loader",
+            options: {...urlLoaderOpts, mimetype: "font/woff"},
+          },
+        ],
+      },
+      {
+        test: /\.woff2(\?v=\d+\.\d+\.\d+)?$/,
+        use: [
+          {
+            loader: "url-loader",
+            options: {...urlLoaderOpts, mimetype: "font/woff2"},
+          },
+        ],
+      },
+      {
+        test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/,
+        use: [
+          {
+            loader: "url-loader",
+            options: {...urlLoaderOpts, mimetype: "application/octet-stream"},
+          },
+        ],
+      },
+      {
+        test: /\.eot(\?v=\d+\.\d+\.\d+)?$/,
+        use: [{loader: "file-loader", options: fileLoaderOpts}],
+      },
+    ])
+  }
+
+  return rules.concat([
+    {
+      test: /\.scss$/,
+      include: SRC_PATH,
+      loader: [styleLoader, cssLoader, postCssLoader, sassLoader],
+    },
+    {
+      test: /\.css$/,
+      loader: [styleLoader, cssLoader, postCssLoader],
+    },
+    {
+      test: /\.woff(\?v=\d+\.\d+\.\d+)?$/,
+      use: [
+        {
+          loader: "url-loader",
+          options: {
+            mimetype: "font/woff",
+          },
+        },
+      ],
+    },
+    {
+      test: /\.woff2(\?v=\d+\.\d+\.\d+)?$/,
+      use: [{loader: "url-loader", options: {mimetype: "font/woff2"}}],
+    },
+    {
+      test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/,
+      use: [
+        {
+          loader: "url-loader",
+          options: {
+            mimetype: "application/octet-stream",
+          },
+        },
+      ],
+    },
+    {
+      test: /\.eot(\?v=\d+\.\d+\.\d+)?$/,
+      use: [
+        {
+          loader: "url-loader",
+          options: {mimetype: "application/vnd.ms-fontobject"},
+        },
+      ],
+    },
+  ])
 }
 
 function getPlugins() {
+  let plugins = [
+    new webpack.NamedModulesPlugin(),
+    new webpack.HotModuleReplacementPlugin(),
+  ]
+
   if (PRODUCTION) {
-    return [
-      new webpack.optimize.OccurenceOrderPlugin(),
-      new webpack.optimize.DedupePlugin(),
-      new webpack.optimize.CommonsChunkPlugin('vendor', '[name].[chunkhash].js'),
-      new webpack.DefinePlugin({
-        'process.env': {
-          NODE_ENV: JSON.stringify('production')
-        }
+    plugins = [
+      new CleanWebpackPlugin([DIST_PATH]),
+      new UglifyJSPlugin({
+        cache: false,
+        parallel: true,
+        sourceMap: false,
       }),
-      new StyleLintPlugin({
-        failOnError: true,
-        syntax: 'scss'
+      new webpack.optimize.ModuleConcatenationPlugin(),
+      new webpack.HashedModuleIdsPlugin(),
+      new webpack.optimize.CommonsChunkPlugin({
+        name: 'vendor',
+        minChunks: ({ resource }) => (
+          resource !== undefined &&
+          resource.indexOf('node_modules') !== -1
+        )
       }),
-      new WebpackMd5Hash(),
-      extractSCSS,
-      new HtmlWebpackPlugin({
-        template: path.join(SRC_PATH, 'index.html'),
-        inject: 'body',
-        minify: {
-          collapseWhitespace: true,
-          removeComments: true
-        }
+      new webpack.optimize.CommonsChunkPlugin({
+        name: 'manifest',
+        minChunks: Infinity
       })
-    ];
+    ]
   }
 
-  return [
-    new webpack.HotModuleReplacementPlugin(),
-    new StyleLintPlugin({
-      failOnError: false,
-      syntax: 'scss'
+  return plugins.concat([
+    new webpack.DefinePlugin({
+      "process.env": ENV,
+    }),
+    extractAppStyles,
+    extractVendorStyles,
+    new webpack.optimize.ModuleConcatenationPlugin(),
+    new webpack.ProvidePlugin({
+      $: "jquery",
+      jQuery: "jquery",
     }),
     new HtmlWebpackPlugin({
-      template: path.join(SRC_PATH, 'index.html'),
-      inject: 'body'
-    })
-  ];
+      template: path.join(SRC_PATH, "index.html"),
+      filename: path.join(DIST_PATH, "index.html"),
+      inject: "body",
+      minify: PRODUCTION
+        ? {
+            collapseWhitespace: true,
+            removeComments: true,
+          }
+        : false,
+      // favicon: path.join(COMMON_IMAGES_PATH, "favicon.ico")
+    }),
+    // https://github.com/jmblog/how-to-optimize-momentjs-with-webpack
+    // You can remove this if you don't use Moment.js:
+    new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
+    // Use this version if you want to enable English and German
+    // new webpack.IgnorePlugin(/^\.\/locale\/(en|de)\.js$/, /moment$/),
+  ])
 }
 
-var config = {
-  context: SRC_PATH,
-  entry: getEntry(),
-  output: getOutput(),
-  devtool: 'inline-source-map',
-  // Use this line, if you don't wish to include source maps for dist
-  // devtool: PRODUCTION ? null : 'inline-source-map',
-  module: {
-    preLoaders: [
-      {
-        test: /\.jsx?$/,
-        include: [
-          SRC_PATH,
-          TEST_PATH
-        ],
-        loader: 'eslint-loader'
-      }
-    ],
-    loaders: getLoaders()
-  },
-  postcss: [
-    autoprefixer({browsers: ['last 3 versions']})
-  ],
-  stylelint: {
-    configFile: path.join(__dirname, './.stylelintrc')
-  },
+const config = {
+  context: path.resolve(__dirname),
+  devtool: PRODUCTION ? false : "inline-source-map",
   resolve: {
-    root: path.resolve(__dirname),
-    modulesDirectories: ['node_modules'],
-    extensions: ['', '.js', '.jsx']
+    modules: [path.resolve(__dirname), "node_modules"],
+    extensions: [".ts", ".tsx", ".js", ".jsx"],
   },
   devServer: {
     progress: true,
@@ -175,11 +267,24 @@ var config = {
     hot: true,
     inline: true,
     contentBase: SRC_PATH,
-    stats: 'errors-only',
-    host: 'localhost',
-    port: 8080
+    stats: "errors-only",
+    host: "127.0.0.1",
+    port: 8080,
+    publicPath: "/",
+    overlay: {
+      warnings: true,
+      errors: true,
+    },
   },
-  plugins: getPlugins()
-};
+  entry: getEntry(),
+  output: getOutput(),
+  module: {
+    rules: getRules(),
+  },
+  plugins: getPlugins(),
+  performance: PRODUCTION ? {
+    hints: "error"
+  } : false
+}
 
-module.exports = config;
+module.exports = config
