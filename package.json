@@ -27,8 +27,8 @@
     "dist": "NODE_ENV=production webpack -p --bail --display-error-details",
     "predist": "rimraf dist",
     "dist:serve": "http-server dist -a localhost -p 8081 -o",
+    "docker": "docker run --rm -e PORT=80 -p 80:80 -d --name webpack-react-template webpack-react-template",
     "docker:build": "docker build -t webpack-react-template .",
-    "docker:run": "docker run -it -e PORT=80 -p 80:80 -d --name webpack-react-template webpack-react-template",
     "docker:remove": "docker rm --force webpack-react-template"
   },
   "dependencies": {},
