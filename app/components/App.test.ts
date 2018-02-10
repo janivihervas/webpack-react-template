@@ -3,7 +3,7 @@ import TestUtils from 'react-addons-test-utils';
 import {describe, it} from 'mocha';
 import {assert} from 'chai';
 
-import App from '../../app/components/App.jsx';
+import App from './App.jsx';
 import {assertReactElements} from '../helpers';
 
 describe('App', () => {
