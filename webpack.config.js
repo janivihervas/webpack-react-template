@@ -6,14 +6,14 @@ const ExtractTextPlugin = require("extract-text-webpack-plugin")
 const UglifyJSPlugin = require("uglifyjs-webpack-plugin")
 const CleanWebpackPlugin = require("clean-webpack-plugin")
 
-process.env.NODE_ENV = process.env.NODE_ENV || "dev"
+process.env.NODE_ENV = process.env.NODE_ENV || "development"
 const ENV = {
   NODE_ENV: JSON.stringify(process.env.NODE_ENV),
 }
 
-const PRODUCTION = process.env.NODE_ENV === "production"
 const SRC_PATH = path.join(__dirname, "app")
 const DIST_PATH = path.join(__dirname, "dist")
+const PRODUCTION = process.env.NODE_ENV === "production"
 
 const extractAppStyles = new ExtractTextPlugin({
   filename: "[name].[contenthash].css",
@@ -23,18 +23,7 @@ const extractVendorStyles = new ExtractTextPlugin({
 })
 
 function getEntry() {
-  if (PRODUCTION) {
-    return {
-      app: path.join(SRC_PATH, "index.tsx")
-    }
-  }
-
-  return {
-    app: [
-      // "react-hot-loader/patch",
-      path.join(SRC_PATH, "index.tsx")
-    ],
-  }
+  return [path.join(SRC_PATH, "index.tsx")]
 }
 
 function getOutput() {
@@ -49,6 +38,7 @@ function getOutput() {
 
   return {
     filename: "bundle.js",
+    publicPath: "/",
   }
 }
 
@@ -77,7 +67,7 @@ function getRules() {
   const urlLoaderOpts = {...fileLoaderOpts, limit: 10000}
   const babelLoader = {loader: "babel-loader", options: {cacheDirectory: true}}
 
-  const rules = [
+  const images = [
     {
       test: /\.(png|jpg|jpeg|gif|svg)$/i,
       include: [SRC_PATH],
@@ -90,82 +80,8 @@ function getRules() {
         },
       ],
     },
-    {
-      test: /\.jsx?$/,
-      include: SRC_PATH,
-      use: [babelLoader],
-    },
-    {
-      test: /\.tsx?$/,
-      include: SRC_PATH,
-      use: [
-        babelLoader,
-        {loader: "ts-loader"}],
-    },
   ]
-
-  if (PRODUCTION) {
-    return rules.concat([
-      {
-        test: /\.scss$/,
-        include: SRC_PATH,
-        loader: extractAppStyles.extract({
-          fallback: "style-loader",
-          use: [cssLoader, postCssLoader, sassLoader],
-        }),
-      },
-      {
-        test: /\.css$/,
-        include: path.join(__dirname, "node_modules"),
-        loader: extractVendorStyles.extract({
-          fallback: "style-loader",
-          use: [cssLoader, postCssLoader],
-        }),
-      },
-      {
-        test: /\.woff(\?v=\d+\.\d+\.\d+)?$/,
-        use: [
-          {
-            loader: "url-loader",
-            options: {...urlLoaderOpts, mimetype: "font/woff"},
-          },
-        ],
-      },
-      {
-        test: /\.woff2(\?v=\d+\.\d+\.\d+)?$/,
-        use: [
-          {
-            loader: "url-loader",
-            options: {...urlLoaderOpts, mimetype: "font/woff2"},
-          },
-        ],
-      },
-      {
-        test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/,
-        use: [
-          {
-            loader: "url-loader",
-            options: {...urlLoaderOpts, mimetype: "application/octet-stream"},
-          },
-        ],
-      },
-      {
-        test: /\.eot(\?v=\d+\.\d+\.\d+)?$/,
-        use: [{loader: "file-loader", options: fileLoaderOpts}],
-      },
-    ])
-  }
-
-  return rules.concat([
-    {
-      test: /\.scss$/,
-      include: SRC_PATH,
-      loader: [styleLoader, cssLoader, postCssLoader, sassLoader],
-    },
-    {
-      test: /\.css$/,
-      loader: [styleLoader, cssLoader, postCssLoader],
-    },
+  const fontsDev = [
     {
       test: /\.woff(\?v=\d+\.\d+\.\d+)?$/,
       use: [
@@ -201,17 +117,124 @@ function getRules() {
         },
       ],
     },
-  ])
+  ]
+  const fontsProd = [
+    {
+      test: /\.woff(\?v=\d+\.\d+\.\d+)?$/,
+      use: [
+        {
+          loader: "url-loader",
+          options: {...urlLoaderOpts, mimetype: "font/woff"},
+        },
+      ],
+    },
+    {
+      test: /\.woff2(\?v=\d+\.\d+\.\d+)?$/,
+      use: [
+        {
+          loader: "url-loader",
+          options: {...urlLoaderOpts, mimetype: "font/woff2"},
+        },
+      ],
+    },
+    {
+      test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/,
+      use: [
+        {
+          loader: "url-loader",
+          options: {...urlLoaderOpts, mimetype: "application/octet-stream"},
+        },
+      ],
+    },
+    {
+      test: /\.eot(\?v=\d+\.\d+\.\d+)?$/,
+      use: [{loader: "file-loader", options: fileLoaderOpts}],
+    },
+  ]
+
+  if (PRODUCTION) {
+    return [
+      ...images,
+      ...fontsProd,
+      {
+        test: /\.jsx?$/,
+        include: SRC_PATH,
+        use: [babelLoader],
+      },
+      {
+        test: /\.tsx?$/,
+        include: SRC_PATH,
+        use: [babelLoader, {loader: "ts-loader"}],
+      },
+      {
+        test: /\.scss$/,
+        include: SRC_PATH,
+        loader: extractAppStyles.extract({
+          fallback: "style-loader",
+          use: [cssLoader, postCssLoader, sassLoader],
+        }),
+      },
+      {
+        test: /\.css$/,
+        include: path.join(__dirname, "node_modules"),
+        loader: extractVendorStyles.extract({
+          fallback: "style-loader",
+          use: [cssLoader, postCssLoader],
+        }),
+      },
+    ]
+  }
+
+  return [
+    ...images,
+    ...fontsDev,
+    {
+      test: /\.jsx?$/,
+      include: SRC_PATH,
+      use: [babelLoader],
+    },
+    {
+      test: /\.tsx?$/,
+      include: SRC_PATH,
+      use: [babelLoader, {loader: "ts-loader"}],
+    },
+    {
+      test: /\.scss$/,
+      include: SRC_PATH,
+      loader: [styleLoader, cssLoader, postCssLoader, sassLoader],
+    },
+    {
+      test: /\.css$/,
+      loader: [styleLoader, cssLoader, postCssLoader],
+    },
+  ]
 }
 
 function getPlugins() {
+  const htmlPluginOptions = {
+    template: path.join(SRC_PATH, "index.html"),
+    inject: "body",
+    // favicon: path.join(SRC_PATH, "favicon.ico")
+  }
   let plugins = [
     new webpack.NamedModulesPlugin(),
     new webpack.HotModuleReplacementPlugin(),
+    new HtmlWebpackPlugin(htmlPluginOptions),
   ]
 
   if (PRODUCTION) {
     plugins = [
+      new webpack.optimize.ModuleConcatenationPlugin(),
+      new HtmlWebpackPlugin({
+        ...htmlPluginOptions,
+        filename: path.join(DIST_PATH, "index.html"),
+        minify: {
+          collapseWhitespace: true,
+          removeComments: true,
+        },
+      }),
+      extractAppStyles,
+      extractVendorStyles,
       new CleanWebpackPlugin([DIST_PATH]),
       new UglifyJSPlugin({
         cache: false,
@@ -236,24 +259,9 @@ function getPlugins() {
     new webpack.DefinePlugin({
       "process.env": ENV,
     }),
-    extractAppStyles,
-    extractVendorStyles,
-    new webpack.optimize.ModuleConcatenationPlugin(),
     new webpack.ProvidePlugin({
       $: "jquery",
       jQuery: "jquery",
-    }),
-    new HtmlWebpackPlugin({
-      template: path.join(SRC_PATH, "index.html"),
-      filename: path.join(DIST_PATH, "index.html"),
-      inject: "body",
-      minify: PRODUCTION
-        ? {
-            collapseWhitespace: true,
-            removeComments: true,
-          }
-        : false,
-      // favicon: path.join(SRC_PATH, "favicon.ico")
     }),
     // https://github.com/jmblog/how-to-optimize-momentjs-with-webpack
     // You can remove this if you don't use Moment.js:
@@ -271,7 +279,6 @@ const config = {
     extensions: [".ts", ".tsx", ".js", ".jsx"],
   },
   devServer: {
-    // progress: true,
     hot: true,
     inline: true,
     contentBase: SRC_PATH,
@@ -279,11 +286,11 @@ const config = {
     host: "127.0.0.1",
     port: 8080,
     publicPath: "/",
-    // historyApiFallback: true,
-    // overlay: {
-    //   warnings: true,
-    //   errors: true,
-    // },
+    historyApiFallback: true,
+    overlay: {
+      warnings: true,
+      errors: true,
+    },
   },
   entry: getEntry(),
   output: getOutput(),

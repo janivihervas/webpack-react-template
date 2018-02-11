@@ -1,17 +1,17 @@
 import React, {PureComponent} from "react"
+import {hot} from "react-hot-loader"
+
 import "./App.scss"
+import Title from "./Title"
 
-export interface Props {
-  message: string
-}
-
-export default class App extends PureComponent<Props> {
-  render() {
+export class App extends PureComponent {
+  public render() {
     return (
       <div className="app">
-        <h1>{this.props.message}</h1>
-        <p>lololo</p>
+        <Title message={"Hello World!"} />
       </div>
     )
   }
 }
+
+export default hot(module)(App)

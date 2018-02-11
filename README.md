@@ -16,15 +16,15 @@
 
 Simple and reasonaboutable, fully-featured, production-ready React project template.
 
+**NOTE**: Hot reload of React components is not working properly.
+
 Tools and frameworks used:
 
 * [Webpack v3](http://webpack.github.io/) for bundling
 * [React](https://facebook.github.io/react/) for rendering DOM
-* [Redux](https://github.com/reactjs/redux/) for state management
 * [Jest](https://facebook.github.io/jest/) for testing
 * [Typescript](https://www.typescriptlang.org/) for static types
 * [SCSS](http://sass-lang.com/) for styles
-* [Bootstrap v4](https://getbootstrap.com/) for basic styles
 * [Docker](https://www.docker.com/) image based on [alpine:3.7](https://hub.docker.com/_/alpine/), [nginx](https://nginx.org/) as a server
 * [Prettier](https://github.com/prettier/prettier) for formatting
 * [TSLint](https://palantir.github.io/tslint/) and [Stylelint](https://github.com/stylelint/stylelint) for linting
