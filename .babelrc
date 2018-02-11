@@ -5,9 +5,11 @@
       "targets": {
         "browsers": ["last 3 versions", "not ie < 10"]
       }
-    }]
+    }],
+    "react"
   ],
   "plugins": [
-    "transform-object-rest-spread"
+    "transform-object-rest-spread",
+    "react-hot-loader/babel"
   ]
 }

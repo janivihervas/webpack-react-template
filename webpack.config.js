@@ -23,8 +23,17 @@ const extractVendorStyles = new ExtractTextPlugin({
 })
 
 function getEntry() {
+  if (PRODUCTION) {
+    return {
+      app: path.join(SRC_PATH, "index.tsx")
+    }
+  }
+
   return {
-    app: path.join(SRC_PATH, "index.ts"),
+    app: [
+      // "react-hot-loader/patch",
+      path.join(SRC_PATH, "index.tsx")
+    ],
   }
 }
 
@@ -89,7 +98,9 @@ function getRules() {
     {
       test: /\.tsx?$/,
       include: SRC_PATH,
-      use: [babelLoader, {loader: "ts-loader"}],
+      use: [
+        babelLoader,
+        {loader: "ts-loader"}],
     },
   ]
 
@@ -210,16 +221,14 @@ function getPlugins() {
       new webpack.optimize.ModuleConcatenationPlugin(),
       new webpack.HashedModuleIdsPlugin(),
       new webpack.optimize.CommonsChunkPlugin({
-        name: 'vendor',
-        minChunks: ({ resource }) => (
-          resource !== undefined &&
-          resource.indexOf('node_modules') !== -1
-        )
+        name: "vendor",
+        minChunks: ({resource}) =>
+          resource !== undefined && resource.indexOf("node_modules") !== -1,
       }),
       new webpack.optimize.CommonsChunkPlugin({
-        name: 'manifest',
-        minChunks: Infinity
-      })
+        name: "manifest",
+        minChunks: Infinity,
+      }),
     ]
   }
 
@@ -244,7 +253,7 @@ function getPlugins() {
             removeComments: true,
           }
         : false,
-      // favicon: path.join(COMMON_IMAGES_PATH, "favicon.ico")
+      // favicon: path.join(SRC_PATH, "favicon.ico")
     }),
     // https://github.com/jmblog/how-to-optimize-momentjs-with-webpack
     // You can remove this if you don't use Moment.js:
@@ -262,8 +271,7 @@ const config = {
     extensions: [".ts", ".tsx", ".js", ".jsx"],
   },
   devServer: {
-    progress: true,
-    colors: true,
+    // progress: true,
     hot: true,
     inline: true,
     contentBase: SRC_PATH,
@@ -271,10 +279,11 @@ const config = {
     host: "127.0.0.1",
     port: 8080,
     publicPath: "/",
-    overlay: {
-      warnings: true,
-      errors: true,
-    },
+    // historyApiFallback: true,
+    // overlay: {
+    //   warnings: true,
+    //   errors: true,
+    // },
   },
   entry: getEntry(),
   output: getOutput(),
@@ -282,9 +291,11 @@ const config = {
     rules: getRules(),
   },
   plugins: getPlugins(),
-  performance: PRODUCTION ? {
-    hints: "error"
-  } : false
+  performance: PRODUCTION
+    ? {
+        hints: "error",
+      }
+    : false,
 }
 
 module.exports = config
