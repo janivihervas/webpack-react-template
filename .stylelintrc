@@ -1,6 +1,12 @@
 {
-    "extends": "stylelint-config-suitcss",
-    "rules": {
-        "declaration-block-properties-order": []
-    }
+  "extends": "stylelint-config-standard",
+  "rules": {
+    "indentation": [null],
+    "selector-list-comma-newline-after": null,
+    "declaration-colon-newline-after": null,
+    "declaration-empty-line-before": null,
+    "at-rule-empty-line-before": null,
+    "rule-empty-line-before": null,
+    "value-list-comma-newline-after": null
+  }
 }
