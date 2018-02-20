@@ -32,7 +32,7 @@ function getOutput() {
       path: path.join(DIST_PATH, "assets"),
       filename: "[name].[chunkhash].js",
       chunkFilename: "[name].[chunkhash].js",
-      publicPath: "/",
+      publicPath: "/assets",
     }
   }
 
@@ -241,7 +241,6 @@ function getPlugins() {
         parallel: true,
         sourceMap: false,
       }),
-      new webpack.optimize.ModuleConcatenationPlugin(),
       new webpack.HashedModuleIdsPlugin(),
       new webpack.optimize.CommonsChunkPlugin({
         name: "vendor",
